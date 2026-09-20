@@ -71,6 +71,36 @@ h1 span{color:#7bc494}
   .game{padding-top:15px}h1{font-size:31px}.stats{gap:5px}.stats div{min-width:65px;padding:7px 4px}
   .tile{width:50px;height:50px}.key{min-width:29px;padding:0 5px;font-size:16px}.row{gap:5px}
 }
+  /* Discord responsive layout */
+@media (max-height: 850px) {
+  .game {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  h1 {
+    margin-top: 0;
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    min-height: 100dvh;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .game {
+    width: 100%;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+}
 </style>
 </head>
 <body><main class="game"><h1><span>وردلي</span> بالعربي</h1><div class="sub">خمن كلمة اليوم في 6 محاولات</div>
