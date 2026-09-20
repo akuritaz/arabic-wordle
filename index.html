@@ -1,13 +1,160 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ووردل عربي</title>
-<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#121213;color:#fff;font-family:Tahoma,Arial;display:flex;justify-content:center}.game{width:min(96%,540px);text-align:center;padding:16px 8px}h1{margin:4px}.sub{color:#aaa}#msg{min-height:30px;margin:8px;font-weight:bold}#board,#kb{display:flex;flex-direction:column;gap:6px;align-items:center}#board{margin:10px auto 24px}.row{display:flex;gap:6px}.tile{width:58px;height:58px;border:2px solid #3a3a3c;display:flex;align-items:center;justify-content:center;font-size:29px;font-weight:bold}.key{height:50px;min-width:36px;border:0;border-radius:5px;background:#818384;color:#fff;font:700 18px Tahoma;padding:0 7px}.wide{min-width:67px;font-size:13px}.correct{background:#538d4e!important;border-color:#538d4e!important}.present{background:#b59f3b!important;border-color:#b59f3b!important}.absent{background:#3a3a3c!important;border-color:#3a3a3c!important}.filled{border-color:#565758}#share{display:none;margin:18px auto;padding:11px 20px;border:0;border-radius:6px;background:#538d4e;color:#fff;font-weight:bold}@media(max-width:430px){.tile{width:50px;height:50px}.key{min-width:29px;padding:0 5px;font-size:16px}}</style></head>
-<body><main class="game"><h1>ووردل عربي</h1><div class="sub">خمن كلمة اليوم في 6 محاولات</div><div id="msg"></div><div id="board"></div><div id="kb"></div><button id="share">مشاركة النتيجة 📋</button></main>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>وردلي بالعربي</title>
+
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#0b1210;--panel:#121b17;--panel2:#17231d;--line:#314239;
+  --text:#f7f5ed;--muted:#aab6af;--green:#3f8f61;--green2:#57a773;
+  --gold:#c6a83d;--absent:#35403b;--key:#65716b;
+}
+body{
+  margin:0;min-height:100vh;color:var(--text);font-family:Tahoma,Arial,sans-serif;
+  display:flex;justify-content:center;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(63,143,97,.16),transparent 30%),
+    radial-gradient(circle at 85% 85%,rgba(198,168,61,.10),transparent 28%),
+    linear-gradient(135deg,#09100d,#101a15 55%,#0a100d);
+  overflow-x:hidden;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.11;
+  background-image:
+    linear-gradient(30deg,transparent 24%,rgba(255,255,255,.09) 25%,rgba(255,255,255,.09) 26%,transparent 27%,transparent 74%,rgba(255,255,255,.09) 75%,rgba(255,255,255,.09) 76%,transparent 77%),
+    linear-gradient(150deg,transparent 24%,rgba(255,255,255,.06) 25%,rgba(255,255,255,.06) 26%,transparent 27%,transparent 74%,rgba(255,255,255,.06) 75%,rgba(255,255,255,.06) 76%,transparent 77%);
+  background-size:54px 94px;
+}
+.game{position:relative;width:min(96%,590px);text-align:center;padding:22px 10px 28px}
+h1{margin:2px 0 4px;font-size:36px;letter-spacing:-1px;text-shadow:0 3px 18px rgba(0,0,0,.35)}
+h1 span{color:#7bc494}
+.sub{color:var(--muted);font-size:14px}
+.stats{display:flex;justify-content:center;gap:8px;margin:15px auto 4px;flex-wrap:wrap}
+.stats div{
+  min-width:76px;padding:8px 7px;background:rgba(18,27,23,.78);
+  border:1px solid var(--line);border-radius:10px;box-shadow:0 7px 22px rgba(0,0,0,.15)
+}
+.stats b{display:block;font-size:20px}.stats span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+#msg{min-height:31px;margin:8px;font-weight:bold;color:#f3df8c}
+#board,#kb{display:flex;flex-direction:column;gap:7px;align-items:center}
+#board{margin:10px auto 24px}
+.row{display:flex;gap:7px}
+.tile{
+  width:58px;height:58px;border:2px solid var(--line);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;font-size:29px;font-weight:bold;
+  background:rgba(13,21,17,.68);box-shadow:inset 0 0 0 1px rgba(255,255,255,.015);
+  transition:transform .12s ease,border-color .12s ease
+}
+.tile.filled{border-color:#668073;animation:pop .12s ease}
+@keyframes pop{50%{transform:scale(1.08)}}
+.key{
+  height:50px;min-width:36px;border:0;border-radius:7px;background:var(--key);color:#fff;
+  font:700 18px Tahoma;padding:0 7px;box-shadow:0 3px 0 rgba(0,0,0,.18);
+  transition:transform .08s ease,filter .12s ease
+}
+.key:hover{filter:brightness(1.08)}.key:active{transform:translateY(2px)}
+.wide{min-width:70px;font-size:13px}
+.correct{background:var(--green)!important;border-color:var(--green2)!important}
+.present{background:var(--gold)!important;border-color:#d8bd54!important}
+.absent{background:var(--absent)!important;border-color:var(--absent)!important}
+.modal{position:fixed;inset:0;background:rgba(2,6,4,.78);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+.modal.show{display:flex}
+.modalCard{
+  position:relative;width:min(92vw,400px);
+  background:linear-gradient(160deg,#17231d,#111915);
+  border:1px solid #46594e;border-radius:18px;padding:30px 20px 26px;
+  box-shadow:0 22px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.04)
+}
+.modalClose{position:absolute;top:8px;left:11px;background:transparent;border:0;color:#aeb9b3;font-size:29px;cursor:pointer}
+.resultIcon{font-size:40px;margin-bottom:7px}.modalCard h2{margin:4px 0 8px;font-size:26px}
+.resultText{color:#d6ddd9;font-size:16px;margin-bottom:21px}
+.nextLabel{color:var(--muted);font-size:13px}.countdown{direction:ltr;color:#f1d96e;font-size:32px;font-weight:800;letter-spacing:1px;margin-top:5px}
+@media(max-width:430px){
+  .game{padding-top:15px}h1{font-size:31px}.stats{gap:5px}.stats div{min-width:65px;padding:7px 4px}
+  .tile{width:50px;height:50px}.key{min-width:29px;padding:0 5px;font-size:16px}.row{gap:5px}
+}
+</style>
+</head>
+<body><main class="game"><h1><span>وردلي</span> بالعربي</h1><div class="sub">خمن كلمة اليوم في 6 محاولات</div>
+<div class="stats" id="stats">
+  <div><b id="played">0</b><span>لعب</span></div>
+  <div><b id="wins">0</b><span>فوز</span></div>
+  <div><b id="rate">0%</b><span>نسبة الفوز</span></div>
+  <div><b id="streak">0</b><span>السلسلة</span></div>
+  <div><b id="best">0</b><span>الأفضل</span></div>
+</div>
+<div id="msg"></div><div id="board"></div><div id="kb"></div>
+<div id="resultModal" class="modal" aria-hidden="true">
+  <div class="modalCard">
+    <button id="closeModal" class="modalClose" aria-label="إغلاق">×</button>
+    <div id="resultIcon" class="resultIcon">🎉</div>
+    <h2 id="resultTitle">أحسنت!</h2>
+    <div id="resultText" class="resultText"></div>
+    <div class="nextLabel">الكلمة الجديدة بعد</div>
+    <div id="countdown" class="countdown">--:--:--</div>
+  </div>
+</div>
+</main>
 <script>
 const N=5,MAX=6;
-const answers=["مكتبة","حديقة","سيارة","مدينة","سفينة","طاولة","نافذة","مفتاح","جريدة","كراسة","وسادة","حقيبة","ستارة","مزرعة","جزيرة","مدرسة","ميدان","رسالة","صناعة","تجارة","زيارة","عبارة","اشارة","عمارة","سعادة","كرامة","ثقافة","رياضة","صحافة","زراعة","مائدة","خزانة","منارة","سحابة","حمامة","فراشة"].filter(x=>[...x].length===5);
-const allowed=new Set([...answers,"جميلة","سريعة","بعيدة","قريبة","غريبة","قديمة","جديدة","خفيفة","باردة","ساخنة","كريمة","سعيدة","حزينة","نظيفة","مريضة","شهيرة","كثيرة","قليلة","دقيقة","كبيرة"].filter(x=>[...x].length===5));
+const answers=["مدرسة","مكتبة","حديقة","سيارة","مدينة","سفينة","طاولة","نافذة","مفتاح","جريدة","كراسة","وسادة","حقيبة","ستارة","مزرعة","جزيرة","ميدان","رسالة","صناعة","تجارة","زيارة","عبارة","اشارة","عمارة","سعادة","كرامة","ثقافة","رياضة","صحافة","زراعة","مائدة","خزانة","منارة","سحابة","حمامة","فراشة","تفاحة","مهندس","قاموس","تلميذ","مساعد","محلول","متصفح","معلمة","مسطرة","باخرة","بوصلة","بحرية","كثيرة","شديدة","ثلاثة","اربعة","تسجيل","بيطري","مجتهد","جميلة","سريعة","بعيدة","قريبة","غريبة","قديمة","جديدة","خفيفة","باردة","ساخنة","كريمة","سعيدة","حزينة","نظيفة","مريضة","شهيرة","قليلة","دقيقة","كبيرة","صغيرة","طويلة","قصيرة","ضعيفة","بسيطة","عظيمة","لطيفة","خطيرة","عميقة","رقيقة","ثقيلة","عالية","واضحة","غامضة","كتابة","تعليم","جامعة","جوامع","شوارع","طريقه","طرقات","منازل","مساكن","مطابخ","مقاعد","موائد","نوافذ","جدران","حوائط","حدائق","اشجار","اغصان","اوراق","ازهار","فاكهة","رمانة","طماطم","بطاطا","فلفلة","عجينة","كعكات","مشروب","دجاجة","اسماك","وجبات","ملعقة","ملاعق","شوكات","متاجر","بائعة","مشتري","اسعار","اعمال","وظيفة","موظفة","مكاتب","شركات","ادارة","مشروع","مصانع","انتاج","اموال","رواتب","اوقات","ساعات","دقائق","ثانية","اسبوع","سنوات","اعوام","امطار","انهار","بحيرة","شواطئ","وديان","صحراء","احجار","منطقة","حافلة","طائرة","قوارب","دراجة","قيادة","محطات","انفاق","رحلات","مسافر","تذكرة","فنادق","ميناء","هواتف","اجهزة","شاشات","لوحات","حاسوب","برامج","ملفات","مواقع","فيديو","اصوات","اهداف","خسارة","ملاعب","سباحة","اجسام","صحيحة","طبيبة","عيادة","ممرضة","عائلة","اطفال","امرأة","جيران","مشاعر","افكار","عقيدة","معرفة","اسئلة","اجابة","اخبار","رواية","قصيدة","الوان","اغنية","الحان","مسارح","افلام","كلمات","معاني","قراءة","دراسة","شهادة","كليات","مساجد","عدالة","قانون","حكومة","طبيعة","نظافة","نفاية","طاقات","حرارة","برودة","بنفسج","رمادي","دائرة"];
+const allowed=new Set(answers);
 const norm=s=>s.trim().replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/[\u064B-\u065F\u0670]/g,"");
-const day=Math.floor(Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),new Date().getUTCDate())/86400000), answer=answers[day%answers.length], A=norm(answer), key="arabic-wordle-v3-"+day;
-let cur="",guesses=[],results=[],over=false;const board=document.querySelector("#board"),kb=document.querySelector("#kb"),msg=document.querySelector("#msg"),share=document.querySelector("#share"),buttons={};
+function riyadhDayId(){
+  const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Riyadh",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+  const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+  return `${v.year}-${v.month}-${v.day}`;
+}
+function dayNumber(id){
+  const [y,m,d]=id.split("-").map(Number);
+  return Math.floor(Date.UTC(y,m-1,d)/86400000);
+}
+const dayId=riyadhDayId(), day=dayNumber(dayId), answer=answers[day%answers.length], A=norm(answer), key="arabic-wordle-v4-"+dayId;
+let cur="",guesses=[],results=[],over=false;const board=document.querySelector("#board"),kb=document.querySelector("#kb"),msg=document.querySelector("#msg"),buttons={};
+const statEls={played:document.querySelector("#played"),wins:document.querySelector("#wins"),rate:document.querySelector("#rate"),streak:document.querySelector("#streak"),best:document.querySelector("#best")};
+const statsKey="arabic-wordle-stats-v1";
+
+const resultModal=document.querySelector("#resultModal"),resultIcon=document.querySelector("#resultIcon"),resultTitle=document.querySelector("#resultTitle"),resultText=document.querySelector("#resultText"),countdown=document.querySelector("#countdown"),closeModal=document.querySelector("#closeModal");
+let countdownTimer=null;
+function msToRiyadhMidnight(){
+  const now=new Date();
+  const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Riyadh",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(now);
+  const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+  const elapsed=(+v.hour*3600 + +v.minute*60 + +v.second)*1000 + now.getMilliseconds();
+  return 86400000-elapsed;
+}
+function updateCountdown(){
+  let ms=Math.max(0,msToRiyadhMidnight());
+  const total=Math.floor(ms/1000),h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
+  countdown.textContent=[h,m,s].map(x=>String(x).padStart(2,"0")).join(":");
+}
+function showResult(won,reopen=false){
+  resultIcon.textContent=won?"🎉":"😭";
+  resultTitle.textContent=won?(reopen?"أنهيت كلمة اليوم!":"صح عليك!"):"انتهت المحاولات";
+  resultText.textContent=won?`حليتها في ${guesses.length}/${MAX} محاولات`:`كلمة اليوم: ${answer}`;
+  resultModal.classList.add("show");resultModal.setAttribute("aria-hidden","false");
+  updateCountdown();clearInterval(countdownTimer);countdownTimer=setInterval(updateCountdown,1000);
+}
+function hideResult(){resultModal.classList.remove("show");resultModal.setAttribute("aria-hidden","true");clearInterval(countdownTimer)}
+closeModal.onclick=hideResult;
+resultModal.onclick=e=>{if(e.target===resultModal)hideResult()};
+
+function getStats(){try{return JSON.parse(localStorage.getItem(statsKey))||{played:0,wins:0,streak:0,best:0,lastPlayed:null,lastWin:null}}catch{return {played:0,wins:0,streak:0,best:0,lastPlayed:null,lastWin:null}}}
+function showStats(){const s=getStats();statEls.played.textContent=s.played;statEls.wins.textContent=s.wins;statEls.rate.textContent=s.played?Math.round(s.wins/s.played*100)+"%":"0%";statEls.streak.textContent=s.streak;statEls.best.textContent=s.best}
+function recordStats(won){
+  const s=getStats();
+  if(s.lastPlayed===dayId)return;
+  s.played++; if(won)s.wins++;
+  if(won){
+    const yesterday=new Date(Date.UTC(...dayId.split("-").map(Number).map((x,i)=>i===1?x-1:x)));
+    yesterday.setUTCDate(yesterday.getUTCDate()-1);
+    const yid=yesterday.toISOString().slice(0,10);
+    s.streak=(s.lastWin===yid)?s.streak+1:1;
+    s.best=Math.max(s.best,s.streak);
+    s.lastWin=dayId;
+  }else s.streak=0;
+  s.lastPlayed=dayId;
+  localStorage.setItem(statsKey,JSON.stringify(s));
+  showStats();
+}
 for(let r=0;r<MAX;r++){let row=document.createElement("div");row.className="row";for(let c=0;c<N;c++){let t=document.createElement("div");t.className="tile";t.id=`t-${r}-${c}`;row.append(t)}board.append(row)}
 const rows=[["ض","ص","ث","ق","ف","غ","ع","ه","خ","ح","ج","د"],["ش","س","ي","ب","ل","ا","ت","ن","م","ك","ط"],["⌫","ئ","ء","ؤ","ر","ى","ة","و","ز","ظ","إدخال"]];
 rows.forEach(a=>{let row=document.createElement("div");row.className="row";a.forEach(k=>{let b=document.createElement("button");b.className="key"+((k==="⌫"||k==="إدخال")?" wide":"");b.textContent=k;b.onclick=()=>press(k);row.append(b);if(!["⌫","إدخال"].includes(k))buttons[k]=b});kb.append(row)});
@@ -18,8 +165,10 @@ const p={absent:1,present:2,correct:3};function keyColor(l,s){[l,norm(l)].forEac
 function paint(r,g,res){[...g].forEach((l,i)=>{let t=document.querySelector(`#t-${r}-${i}`);t.textContent=l;t.classList.add(res[i]);keyColor(l,res[i])})}
 function accepted(g){let n=norm(g);return [...allowed].some(w=>norm(w)===n)}
 function say(x){msg.textContent=x;if(!over){clearTimeout(say.t);say.t=setTimeout(()=>msg.textContent="",1800)}}
-function submit(){if([...cur].length!==N)return say("الكلمة لازم تكون 5 أحرف");if(!accepted(cur))return say("الكلمة غير موجودة في القائمة");let g=cur,res=evalGuess(g),r=guesses.length;guesses.push(g);results.push(res);paint(r,g,res);cur="";if(norm(g)===A){over=true;say("صح عليك! 🎉");share.style.display="block"}else if(guesses.length>=MAX){over=true;say("انتهت المحاولات 😭 الكلمة: "+answer);share.style.display="block"}save()}
-function save(){localStorage.setItem(key,JSON.stringify({guesses,results,over}))}function load(){let raw=localStorage.getItem(key);if(!raw)return;try{let d=JSON.parse(raw);guesses=d.guesses||[];results=d.results||[];over=!!d.over;guesses.forEach((g,r)=>paint(r,g,results[r]||evalGuess(g)));if(over){say(guesses.some(g=>norm(g)===A)?"خلصتها اليوم 🎉":"كلمة اليوم كانت: "+answer);share.style.display="block"}}catch{localStorage.removeItem(key)}}
+function submit(){if([...cur].length!==N)return say("الكلمة لازم تكون 5 أحرف");if(!accepted(cur))return say("الكلمة غير موجودة في القائمة");let g=cur,res=evalGuess(g),r=guesses.length;guesses.push(g);results.push(res);paint(r,g,res);cur="";if(norm(g)===A){over=true;recordStats(true);say(`صح عليك! ${guesses.length}/${MAX} 🎉`);save();setTimeout(()=>showResult(true),250)}
+else if(guesses.length>=MAX){over=true;recordStats(false);say("انتهت المحاولات 😭 الكلمة: "+answer);save();setTimeout(()=>showResult(false),250)}
+else save()}
+function save(){localStorage.setItem(key,JSON.stringify({guesses,results,over}))}function load(){let raw=localStorage.getItem(key);if(!raw)return;try{let d=JSON.parse(raw);guesses=d.guesses||[];results=d.results||[];over=!!d.over;guesses.forEach((g,r)=>paint(r,g,results[r]||evalGuess(g)));if(over){const won=guesses.some(g=>norm(g)===A);say(won?"خلصتها اليوم 🎉":"كلمة اليوم كانت: "+answer);setTimeout(()=>showResult(won,true),180)}}catch{localStorage.removeItem(key)}}
 document.addEventListener("keydown",e=>{if(e.key==="Backspace")press("⌫");else if(e.key==="Enter")press("إدخال");else if(/^[\u0621-\u064A]$/.test(e.key))press(e.key)});
-share.onclick=async()=>{let squares=results.map(r=>r.map(s=>s==="correct"?"🟩":s==="present"?"🟨":"⬛").join("")).join("\n"),won=guesses.some(g=>norm(g)===A),text=`ووردل عربي ${won?guesses.length:"X"}/${MAX}\n\n${squares}`;try{await navigator.clipboard.writeText(text);say("تم نسخ النتيجة 📋")}catch{say("ما قدرت أنسخ النتيجة")}};load();
+showStats();load();
 </script></body></html>
